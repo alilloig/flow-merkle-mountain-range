@@ -1,4 +1,4 @@
-# Merkle Mountain Ranges (MMRs)
+# Merkle Mountain Range (MMR)
 
 ## Introduction
 
@@ -63,14 +63,11 @@ The total amount of nodes that form the MMR
 
 ### Root
 
-The unique identifier of a MMR at a certain point of its life, obtained by hashing together all the peaks (also known as bagging peaks).
-(is size included in the calc of the root? some sources say so, im not sure what we are doing)
+The unique identifier of a MMR at a certain point of its life, obtained by hashing together all the peaks (also known as bagging peaks). Some implementations, as this one does, include the MMR size along the peak hashes when computing the root.
 
 ### Proof Path
 
-The list of node positions needed for a certain position to be able to calculate the hash of the peak where that leave belongs
-(needs accurate english writting!!) #naew?
-
+The list of node positions needed for a certain position to be able to calculate the hash of the peak where that leaf belongs
 
 ## Proof Generation and Verification
 
@@ -78,99 +75,11 @@ The list of node positions needed for a certain position to be able to calculate
 
 An MMR proof for a leaf allows verification that the leaf is part of the MMR without requiring the entire structure.
 
-# ai generated and not reviewed yet from here
-### Generating a Proof for Leaf at Position `p`
+#### Generation
 
-1. Start with the leaf position `p`
-2. Calculate the sibling position:
-   - If `p` is a left child (odd index of its level), sibling is at `p + 1`
-   - If `p` is a right child (even index of its level), sibling is at `p - 1`
-3. Calculate the parent position
-4. Repeat steps 2-3 for the parent, moving up the tree
-5. When you reach a peak, add that peak to the proof
-6. Include all other peaks in the MMR
-
-The proof consists of:
-- The value of the leaf node
-- The hash values of all siblings along the path from the leaf to its peak
-- The hash values of all other peaks
-
-### Proof Verification
-
-To verify a proof for a leaf at position `p`:
-
-1. Start with the leaf value and position
-2. Calculate the hash of the leaf
-3. Use the provided sibling hashes to calculate parent hashes moving up the tree
-4. Reach the peak hash
-5. Combine this peak with other provided peak hashes to calculate the MMR root
-6. Compare the calculated root with the expected root
-
-#### Detailed Verification Algorithm
-
-1. Identify if the leaf is a left or right child
-2. Combine with the appropriate sibling hash:
-   ```
-   if is_left_child(p):
-       parent_hash = hash(leaf_hash + sibling_hash)
-   else:
-       parent_hash = hash(sibling_hash + leaf_hash)
-   ```
-3. Move up to the parent position
-4. Repeat until reaching a peak
-5. Combine all peaks using the "bagging the peaks" algorithm to calculate the final root
-
-### "Bagging the Peaks" Algorithm
-
-The peaks are combined from right to left:
-1. Start with the rightmost peak
-2. For each peak moving left:
-   ```
-   accumulator = hash(peak_hash + accumulator)
-   ```
-3. The final accumulator value is the MMR root
+#### Verification
 
 ## Example
-
-Let's walk through a full example with an MMR containing 5 leaves with values A, B, C, D, and E:
-
-1. Leaf positions: 1, 2, 4, 5, 8
-2. Internal nodes: 3, 6, 7
-3. Peaks: 7, 8
-
-MMR structure:
-```
-       7
-      / \
-     /   \
-    3     6
-   / \   / \
-  1   2 4   5 8
-```
-### Proof for Leaf at Position 4 (value C)
-
-1. Leaf 4 (C) is a left child
-2. Its sibling is at position 5 (D)
-3. Its parent is at position 6
-4. Position 6's sibling is part of the path to position 3
-5. Position 6's parent is at position 7 (a peak)
-6. The other peak is at position 8 (E)
-
-Proof components:
-- Leaf value: C
-- Sibling hashes: hash(D), hash from position 3
-- Other peak hash: hash(E)
-
-### Verification
-
-1. Verify leaf 4 (C):
-   - Calculate hash(C)
-   - Combine with sibling hash(D) to get hash(C|D) for position 6
-   - Combine with hash from position 3 to get hash(3|6) for position 7
-   - Combine with hash(E) from position 8 to get the root hash
-2. Compare the calculated root hash with the expected root hash
-
-If they match, the proof is valid, confirming that leaf C is part of the MMR.
 
 ## Acknowledgments
 
